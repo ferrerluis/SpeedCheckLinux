@@ -1,0 +1,7 @@
+# Ubuntu distribution packages, not pip requirements. Use /usr/bin/python3.
+python3
+python3-gi
+python3-requests
+gir1.2-gtk-3.0
+gir1.2-ayatanaappindicator3-0.1
+# GNOME also needs an enabled AppIndicator extension (included in Ubuntu Desktop).
