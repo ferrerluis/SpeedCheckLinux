@@ -2,7 +2,12 @@
 
 A small Ubuntu panel app that actively measures internet download and upload speed
 with Cloudflare. Both readings stay in the top-right panel between tests:
-`↓ 240 ↑ 35 Mbps`. Original Python code and gauge icon; MIT licensed.
+`↓ 240 ↑ 35 Mbps`, without an extra panel icon. Original Python code; MIT licensed.
+
+On GNOME 50, the included **SpeedCheck Panel** helper moves the clock beside
+Activities on the left and lets the right panel use the remaining width. This
+keeps the clock and speed text readable on narrow remote desktops; the calendar
+and SpeedCheck menus retain their native appearance.
 
 ## Setup
 
@@ -28,6 +33,16 @@ Repeat `./install.sh` to update. It retains preferences and results and stops th
 old instance; launch again afterward. The app also appears in Ubuntu's application
 launcher as **SpeedCheck Linux**. Login startup is enabled on a fresh installation.
 
+The installer also installs the user-local GNOME 50 panel helper and enables it
+on first installation. GNOME discovers new extensions at login, so a fresh
+installation may need logout/login to activate the helper; save your work first.
+It was activated live on the original machine without logging out the user.
+
+Enable or disable **SpeedCheck Panel** in Ubuntu's Extensions app. Disabling it
+restores the clock's previous position and GNOME's original panel allocation;
+updates preserve the helper's enabled/disabled preference. Changes to the helper's
+JavaScript take effect after the next login, as required by GNOME's module cache.
+
 ## Usage
 
 Click the panel reading to see the latest results, last successful test, next
@@ -37,7 +52,7 @@ mode changes only the panel label; every test measures both directions.
 
 The `···` suffix marks an active measurement; values update as bytes transfer.
 Upload progress is provisional because socket buffering can temporarily inflate
-it. Completed upload results wait for the server acknowledgement. `⚠` means the
+it. Completed upload results wait for the server acknowledgement. `*` means the
 last attempt failed or results are older than two testing intervals. The menu
 explains the failure and retains the last successful time and readings.
 
@@ -124,12 +139,19 @@ the test payloads; Cloudflare sees normal connection metadata, including your IP
 - Current diagnostic status and bounded log: same state folder, `status.json`
   and `app.log` (default `~/.local/state/speedcheck-linux`)
 - Login entry: `$XDG_CONFIG_HOME/autostart/speedcheck-linux.desktop`
+- GNOME panel helper: `$XDG_DATA_HOME/gnome-shell/extensions/speedcheck-panel@speedcheck-linux`
 
 If nothing appears, check `gnome-extensions info ubuntu-appindicators@ubuntu.com`.
 Enable Ubuntu AppIndicators in the Extensions app. A newly installed extension
 may require logout/login; do that yourself after saving your work. The existing
 extension was already active on the installation machine. This app needs the
 graphical user's session bus and display, so launch it as yourself, never root.
+
+For a centered clock or clipped panel text, check
+`gnome-extensions info speedcheck-panel@speedcheck-linux` and enable SpeedCheck
+Panel in Extensions. Its layout was verified at 640 and 800 pixels wide on GNOME
+50; a screen narrower than the combined panel contents still has physical limits.
+The original gauge remains an application-launcher icon; the panel itself is text-only.
 
 If imports fail, run `/usr/bin/python3` and install the packages in
 `dependencies.txt`. If tests fail, inspect `--status` and `app.log`, check internet
@@ -161,8 +183,9 @@ cd ~/repos/SpeedCheckLinux
 ./uninstall.sh --purge  # also delete preferences, results and logs
 ```
 
-These remove the app, launcher, icon, private binding, and login entry. They do
-not remove shared system packages or the source repository.
+These remove the app, launcher, icon, private binding, login entry and panel
+helper. Removing the active helper restores the clock's original position.
+Shared system packages and the source repository are retained.
 
 ## Attribution and license
 

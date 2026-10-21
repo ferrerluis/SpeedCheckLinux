@@ -1,0 +1,8 @@
+{
+  "uuid": "speedcheck-panel@speedcheck-linux",
+  "name": "SpeedCheck Panel",
+  "description": "Keep the clock on the left and show only SpeedCheck's download/upload text.",
+  "shell-version": ["50"],
+  "version": 1,
+  "url": "https://github.com/ferrerluis/SpeedCheckLinux"
+}

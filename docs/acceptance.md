@@ -1,8 +1,8 @@
-# Product acceptance catalog v1
+# Product acceptance catalog v3
 
 Run on Ubuntu with the AppIndicator extension active. Record timestamps, revision,
 dependency versions, results, and evidence in an untracked `evidence/` folder.
-Each required case below is a single sub-test; all six must pass for acceptance.
+All seven cases and eight required sub-tests must pass for acceptance.
 
 | ID | Prerequisites and repeatable steps | Expected outcome and evidence |
 |---|---|---|
@@ -12,3 +12,5 @@ Each required case below is a single sub-test; all six must pass for acceptance.
 | TC04.1 Relaunch/persistence | Pause; select upload-only and interval 30; record status. Launch again, then quit/start, finally restore both/15/resumed. | Relaunch keeps the same process; restart restores preferences, cached result and next due; exactly one registered indicator/application. Save process IDs/status before/after and restored state. |
 | TC05.1 Failure recovery | With cached success, launch a test, SIGSTOP its worker, and wait for the 60-second watchdog. Inspect status, then use a short verification interval for the next automatic test and restore 15. | UI responds while stalled; worker is killed by deadline; cached results remain with failure indication; future test is scheduled and succeeds. Save timeout and recovery status. Run focused `unittest` checks. |
 | TC06.1 Installation/startup | Check desktop/autostart entries, executable path and permissions; run installer twice with preferences changed. Test installer/uninstaller in isolated XDG directories. | Login entry points at the working user executable, toggle persists across reinstall, Quit stops app, uninstall removes only its own files and optionally purges state. Save command output and final entry. |
+| TC07.1 Narrow native panel | On GNOME 50, enable SpeedCheck Panel. Inspect native screenshots at 640×800 and 800×800; open SpeedCheck and the clock calendar. Disable/re-enable the helper and restart SpeedCheck. | Clock sits beside Activities on the left; complete download/upload text is readable on the right with no gauge icon or clock overlap; menus work. Disabling restores the prior clock position; re-enabling and app restart restore the text-only layout. Interval stays 15 minutes. Save screenshots, actor rectangles, extension state and final preferences. |
+| TC07.2 Resize without clipping | Keep the helper enabled while the native display changes from 640 to 800 pixels wide and back. Inspect the complete panel text and clock/indicator rectangles at each width. | Both numerical speeds and Mbps remain fully visible without an ellipsis; the clock and SpeedCheck never intersect. GNOME uses available panel space instead of squeezing the right side into half the screen. Save screenshots and geometry for all widths. |

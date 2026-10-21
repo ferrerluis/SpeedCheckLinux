@@ -63,7 +63,9 @@ class SpeedCheck(Gtk.Application):
         self.monitor = Gio.NetworkMonitor.get_default()
         # NETWORK_AVAILABLE means a route exists. Captive portals/errors are handled by HTTPS.
         self.make_menu()
-        icon = str(Path(__file__).resolve().parent.parent / "assets/speedcheck-linux.svg")
+        # AppIndicator requires an icon; the GNOME helper removes its allocation.
+        # Keep the desktop-launcher gauge separate from the text-only panel display.
+        icon = str(Path(__file__).resolve().parent.parent / "assets/panel-empty.svg")
         self.indicator = Indicator.Indicator.new("speedcheck-linux", icon, Indicator.IndicatorCategory.APPLICATION_STATUS)
         self.indicator.set_title("SpeedCheck Linux")
         self.indicator.set_menu(self.menu)
@@ -246,7 +248,7 @@ class SpeedCheck(Gtk.Application):
             parts.append("↑ " + number(values["upload"]))
         error = self.state.get("attempt", {}).get("error")
         stale = bool(result) and time.time() - result["finished_at"] > self.schedule.interval * 2
-        suffix = " ···" if self.schedule.running else (" ⚠" if error or stale else "")
+        suffix = " ···" if self.schedule.running else (" *" if error or stale else "")
         label = " ".join(parts) + " Mbps" + suffix
         self.indicator.set_label(label, "↓ 9999 ↑ 9999 Mbps")
         self.rows["download"].set_label("Download: " + number(values["download"]) + " Mbps")

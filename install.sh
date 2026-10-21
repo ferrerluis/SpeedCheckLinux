@@ -10,6 +10,27 @@ if [[ -x "$binary" ]]; then "$binary" --quit >/dev/null 2>&1 || true; fi
 mkdir -p "$destination" "$HOME/.local/bin" "$data_root/applications" "$data_root/icons/hicolor/scalable/apps"
 cp -R "$source_dir/speedcheck_linux" "$source_dir/assets" "$destination/"
 cp "$source_dir/LICENSE" "$destination/"
+extension_uuid="speedcheck-panel@speedcheck-linux"
+extension_dir="$data_root/gnome-shell/extensions/$extension_uuid"
+extension_fresh=true
+if [[ -f "$extension_dir/metadata.json" ]]; then extension_fresh=false; fi
+mkdir -p "$extension_dir"
+cp "$source_dir/gnome-extension/"*.js "$source_dir/gnome-extension/metadata.json" "$extension_dir/"
+if [[ "$extension_fresh" == true && -n ${DBUS_SESSION_BUS_ADDRESS:-} ]]; then
+    /usr/bin/python3 - "$extension_uuid" <<'PY'
+import sys
+from gi.repository import Gio
+settings = Gio.Settings.new('org.gnome.shell')
+uuid = sys.argv[1]
+enabled = settings.get_strv('enabled-extensions')
+if uuid not in enabled:
+    settings.set_strv('enabled-extensions', enabled + [uuid])
+disabled = settings.get_strv('disabled-extensions')
+if uuid in disabled:
+    settings.set_strv('disabled-extensions', [item for item in disabled if item != uuid])
+Gio.Settings.sync()
+PY
+fi
 if ! /usr/bin/python3 -c 'import gi; gi.require_version("AyatanaAppIndicator3", "0.1"); from gi.repository import AyatanaAppIndicator3' 2>/dev/null; then
     # Ubuntu sometimes ships the native library without its small introspection binding.
     # Extract the distribution's binding for this user; no system files are changed.
@@ -65,3 +86,4 @@ PY
 if command -v update-desktop-database >/dev/null; then update-desktop-database "$data_root/applications"; fi
 echo "Installed: $binary"
 echo "Launch: $binary"
+echo 'Panel helper installed. A first installation may need login again to load it; existing enabled state is preserved on updates.'
