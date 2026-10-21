@@ -168,6 +168,7 @@ The focused suite covers decimal conversion, a simulated fast link, real byte
 accounting, bounded sizes, deadlines/timeouts, partial response rejection,
 start cadence, overlap prevention, pause/resume, offline/suspend catch-up, and
 failure persistence. Product acceptance steps are in [docs/acceptance.md](docs/acceptance.md).
+Narrow-screen layout results are in [the panel verification report](docs/panel-layout-verification.md).
 
 For live schedule verification, `speedcheck-linux --verification-interval 10`
 temporarily selects ten seconds without saving that interval. Restore with
