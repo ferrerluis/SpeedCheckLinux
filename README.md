@@ -105,11 +105,24 @@ describes 25 MB down / 10 MB up; inspected upstream source instead requested
 50 MB down / 10 MB up. This implementation uses the same endpoints with adaptive
 payloads and explicit error checking.
 
-Each direction runs a 64 kB warm-up and three sequential samples. Downloads start
-at 1 MB, uploads at 256 kB. Later payloads target about 1.5 seconds based on the
-preceding sample, capped at 64 MB down and 32 MB up per request. The final reading
-is `sum(actual body bytes) × 8 / sum(monotonic sample seconds) / 1,000,000`.
-Warm-ups are excluded from throughput but included in reported data use.
+Each direction begins with a 64 kB warm-up. Downloads then ramp through payload
+ceilings of 1, 8, 32 and 64 MB until a completed sample lasts at least three
+seconds, or the last ceiling/time budget is reached. The next request is limited
+by its estimated transfer time (up to six seconds), with a four-second timeout
+margin. Slow links can stop after a small sample instead of downloading 32/64 MB.
+
+The final download reading uses the **last completed sample**, not the fastest
+sample or an average diluted by the short ramp-up probes:
+`actual measured body bytes × 8 / monotonic sample seconds / 1,000,000`.
+This reduces short-transfer bias without pretending to measure a guaranteed peak.
+Uploads retain three adaptive samples starting at 256 kB, targeting 1.5 seconds
+and capped at 32 MB per request; their final reading uses total measured bytes
+over total sample seconds. Both directions use decimal Mbps.
+
+Result fields ending in `_bytes` count all payload bytes, including warm-up and
+ramp-up, for data-use accounting. `_measured_bytes` and `_seconds` identify the
+bytes/time used in the final speed calculation; download ramp-up probes are
+excluded from those fields. Earlier cached results remain readable.
 
 Download timing begins before reading the response body, after headers arrive,
 and includes every measured body byte. Upload timing includes request transmission
@@ -122,7 +135,7 @@ of ISP capacity. Wi-Fi, VPNs, competing traffic, Cloudflare routing, TLS/socket
 buffering, and server response latency affect readings. On very fast links the
 payload caps shorten samples, so latency and buffering matter more; multi-gigabit
 capacity can be underestimated. A simulated 2 Gbps test checks conversion,
-adaptive growth and payload caps, but does not establish this machine's link rate.
+ramp-up and payload caps, but does not establish this machine's link rate.
 
 Each request has 4-second connect and socket inactivity timeouts, each direction
 has a 24-second budget, and the GTK supervisor kills the separate measurement
@@ -130,9 +143,9 @@ process after **60 seconds**, including DNS or upload stalls. A failure preserve
 the previous successful pair and leaves the scheduler active. Partial/failed
 transfers still consume data.
 
-**Data use:** successful tests range from about **3.9 MB to 193.4 MB total**,
+**Data use:** successful tests range from about **1.9 MB to 169.4 MB total**,
 depending on measured speed; protocol overhead is additional. At 15-minute
-intervals over 24 hours this is roughly **0.37–18.6 GB/day** (96 tests). Faster
+intervals over 24 hours this is roughly **0.18–16.3 GB/day** (96 tests). Faster
 connections approach the upper bound. Pause testing or choose a longer interval
 on a metered connection. No history or telemetry is uploaded by this app beyond
 the test payloads; Cloudflare sees normal connection metadata, including your IP.

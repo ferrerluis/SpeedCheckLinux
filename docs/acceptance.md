@@ -1,8 +1,8 @@
-# Product acceptance catalog v4
+# Product acceptance catalog v5
 
 Run on Ubuntu with the AppIndicator extension active. Record timestamps, revision,
 dependency versions, results, and evidence in an untracked `evidence/` folder.
-All eight cases and eleven required sub-tests must pass for acceptance.
+All nine cases and fourteen required sub-tests must pass for acceptance.
 
 | ID | Prerequisites and repeatable steps | Expected outcome and evidence |
 |---|---|---|
@@ -17,3 +17,6 @@ All eight cases and eleven required sub-tests must pass for acceptance.
 | TC08.1 Standalone GNOME startup | With `gnome-shell-headless.service` active, install and validate the app-owned unit and enabled dependency. Start the unit using its boot definition. | One live app/indicator; retained preferences and results; automatic overdue tests work. Save unit/dependency, service, indicator and real-test status. A session replay is not an actual reboot; record that limit. |
 | TC08.2 Login toggle on remote desktop | Turn Launch on login off, quit and start the unit. Launch manually, turn login on, quit and start the unit again. | Off removes the login file and skips service startup with no app; on starts one app with cached results and both/15/resumed settings. Save condition results, application bus owner and preferences. |
 | TC08.3 Quit, relaunch and cleanup | Quit a service-managed instance, wait beyond its five-second restart delay, then start and relaunch. Repeat install/uninstall in isolated XDG roots with a headless service fixture. | Quit does not respawn; relaunch keeps one PID; install/uninstall manages only the app's unit/link, retains unrelated files, and preserves the login toggle. Leave the real app running. Save process and isolated installation evidence. |
+| TC09.1 Sustained sampling | Simulate a fast link with slow short transfers, a consistently slow link, limited time remaining, and an earlier sample faster than the final one. | Larger samples reached where time permits; final completed sample supplies exact decimal Mbps rather than a peak; slow links are not forced into large transfers; payload/deadline bounds preserved. Save focused test output and byte accounting. |
+| TC09.2 Live sustained estimate | Install and compare real app runs with bounded independent 32/64 MB downloads, one test at a time. | Successful positive measurements comparable to sustained transfers (within 25% when conditions are stable); retain individual values when variable. One panel indicator, both speeds, 15-minute/resumed preferences at completion. Save status, independent transfers and panel evidence. |
+| TC09.3 Measurement failure recovery | With cached success, stall only a live measurement worker and send UI commands. Wait for the 60-second supervisor; allow the next automatic test with a temporary short interval, then restore 15. | UI remains responsive, timed-out worker exits, cached success survives with failure indicated, and a later automatic test succeeds. Save timed states and restored preferences. |

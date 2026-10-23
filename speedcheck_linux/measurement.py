@@ -12,6 +12,8 @@ TEST_DEADLINE = 60
 PHASE_BUDGET = 24
 TIMEOUT = (4, 4)  # connect and socket inactivity; parent also enforces a hard deadline
 CHUNK = 64 * 1024
+DOWNLOAD_STEPS = (1_000_000, 8_000_000, 32_000_000, 64_000_000)
+SUSTAINED_SECONDS = 3
 
 
 class MeasurementError(Exception):
@@ -84,6 +86,27 @@ def transfer(session, direction, size, deadline, progress):
     return count, elapsed
 
 
+def sustained_download(session, deadline, progress):
+    """Ramp up independently of an initially slow probe; retain the final sample."""
+    total_bytes = 0
+    size = DOWNLOAD_STEPS[0]
+    for ceiling in (*DOWNLOAD_STEPS[1:], None):
+        count, elapsed = transfer(session, "download", size, deadline, progress)
+        total_bytes += count
+        value = mbps(count, elapsed)
+        progress(value)
+        if elapsed >= SUSTAINED_SECONDS or ceiling is None:
+            break
+        # Aim for a substantial transfer without committing a slow connection to
+        # 32/64 MB. Leave a read-timeout margin inside the direction's deadline.
+        affordable_seconds = min(6, deadline - time.monotonic() - TIMEOUT[1])
+        next_size = min(ceiling, int(count / elapsed * max(0, affordable_seconds)))
+        if next_size <= size:
+            break
+        size = next_size
+    return value, total_bytes, count, elapsed
+
+
 def measure(emit):
     deadline = time.monotonic() + TEST_DEADLINE - 1
     results = {}
@@ -96,6 +119,14 @@ def measure(emit):
             phase_deadline = min(deadline, time.monotonic() + PHASE_BUDGET)
             # Small warm-up opens TLS and helps avoid measuring only a cold connection.
             transfer(session, direction, 64_000, phase_deadline, lambda value: None)
+            if direction == "download":
+                value, total_bytes, measured_bytes, measured_seconds = sustained_download(
+                    session, phase_deadline,
+                    lambda value: emit({"type": "progress", "direction": "download", "value": value}))
+                results.update(download=value, download_bytes=total_bytes + 64_000,
+                               download_measured_bytes=measured_bytes,
+                               download_seconds=measured_seconds)
+                continue
             total_bytes, total_seconds, size = 0, 0, first
             for _ in range(3):
                 count, elapsed = transfer(
@@ -109,6 +140,7 @@ def measure(emit):
                 size = max(first, min(maximum, int(count / elapsed * 1.5)))
             results[direction] = value
             results[direction + "_bytes"] = total_bytes + 64_000
+            results[direction + "_measured_bytes"] = total_bytes
             results[direction + "_seconds"] = total_seconds
     results["finished_at"] = time.time()
     return results
