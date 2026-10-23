@@ -11,6 +11,10 @@ import time
 from datetime import datetime
 from pathlib import Path
 
+# PyGObject initializes GTK and consumes --display during import.
+# Preserve our legacy option before that happens.
+sys.argv = ["--display-mode" if arg == "--display" else arg for arg in sys.argv]
+
 import gi
 
 gi.require_version("Gtk", "3.0")
@@ -325,7 +329,4 @@ def main():
     log_path = paths.state_dir / "app.log"
     if log_path.stat().st_size > 1_000_000:
         log_path.write_text("")
-    # GTK consumes --display as its own display-server option before dispatch.
-    # Normalize our legacy spelling locally; --display-mode is unambiguous.
-    args = ["--display-mode" if arg == "--display" else arg for arg in sys.argv]
-    return SpeedCheck().run(args)
+    return SpeedCheck().run(sys.argv)
