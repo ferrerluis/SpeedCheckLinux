@@ -1,0 +1,18 @@
+# SPDX-License-Identifier: MIT
+[Unit]
+Description=SpeedCheck Linux in the standalone GNOME desktop
+BindsTo=gnome-shell-headless.service
+After=gnome-shell-headless.service
+ConditionPathExists=@AUTOSTART@
+StartLimitIntervalSec=0
+
+[Service]
+Type=exec
+Environment=GDK_BACKEND=wayland
+ExecStart="@EXECUTABLE@"
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=5
+
+[Install]
+WantedBy=gnome-shell-headless.service

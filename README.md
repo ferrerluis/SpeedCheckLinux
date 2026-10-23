@@ -33,6 +33,14 @@ Repeat `./install.sh` to update. It retains preferences and results and stops th
 old instance; launch again afterward. The app also appears in Ubuntu's application
 launcher as **SpeedCheck Linux**. Login startup is enabled on a fresh installation.
 
+On a computer that boots GNOME directly through the user-local
+`gnome-shell-headless.service` (rather than a full login session), the installer
+also adds `speedcheck-linux-headless.service` to that desktop's boot dependencies.
+This handles remote desktops that never activate XDG autostart. It starts after
+the shell, retries if Wayland is not ready, and stops with that desktop. The same
+**Launch on login** toggle controls it: removing the autostart entry makes the
+service skip startup. Quit exits normally without restarting the app.
+
 The installer also installs the user-local GNOME 50 panel helper and enables it
 on first installation. GNOME discovers new extensions at login, so a fresh
 installation may need logout/login to activate the helper; save your work first.
@@ -139,6 +147,7 @@ the test payloads; Cloudflare sees normal connection metadata, including your IP
 - Current diagnostic status and bounded log: same state folder, `status.json`
   and `app.log` (default `~/.local/state/speedcheck-linux`)
 - Login entry: `$XDG_CONFIG_HOME/autostart/speedcheck-linux.desktop`
+- Standalone GNOME startup, when detected: `$XDG_CONFIG_HOME/systemd/user/speedcheck-linux-headless.service`
 - GNOME panel helper: `$XDG_DATA_HOME/gnome-shell/extensions/speedcheck-panel@speedcheck-linux`
 
 If nothing appears, check `gnome-extensions info ubuntu-appindicators@ubuntu.com`.
@@ -146,6 +155,12 @@ Enable Ubuntu AppIndicators in the Extensions app. A newly installed extension
 may require logout/login; do that yourself after saving your work. The existing
 extension was already active on the installation machine. This app needs the
 graphical user's session bus and display, so launch it as yourself, never root.
+
+If it fails to start after reboot on a standalone remote GNOME desktop, repeat
+`./install.sh`, then run `systemctl --user start speedcheck-linux-headless.service`.
+Check `systemctl --user status speedcheck-linux-headless.service` and
+`journalctl --user -u speedcheck-linux-headless.service`. The ordinary login entry
+alone cannot launch apps when `xdg-desktop-autostart.target` is never started.
 
 For a centered clock or clipped panel text, check
 `gnome-extensions info speedcheck-panel@speedcheck-linux` and enable SpeedCheck
@@ -186,6 +201,7 @@ cd ~/repos/SpeedCheckLinux
 
 These remove the app, launcher, icon, private binding, login entry and panel
 helper. Removing the active helper restores the clock's original position.
+The app's standalone GNOME service and boot dependency are removed too.
 Shared system packages and the source repository are retained.
 
 ## Attribution and license

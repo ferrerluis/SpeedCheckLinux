@@ -1,8 +1,8 @@
-# Product acceptance catalog v3
+# Product acceptance catalog v4
 
 Run on Ubuntu with the AppIndicator extension active. Record timestamps, revision,
 dependency versions, results, and evidence in an untracked `evidence/` folder.
-All seven cases and eight required sub-tests must pass for acceptance.
+All eight cases and eleven required sub-tests must pass for acceptance.
 
 | ID | Prerequisites and repeatable steps | Expected outcome and evidence |
 |---|---|---|
@@ -14,3 +14,6 @@ All seven cases and eight required sub-tests must pass for acceptance.
 | TC06.1 Installation/startup | Check desktop/autostart entries, executable path and permissions; run installer twice with preferences changed. Test installer/uninstaller in isolated XDG directories. | Login entry points at the working user executable, toggle persists across reinstall, Quit stops app, uninstall removes only its own files and optionally purges state. Save command output and final entry. |
 | TC07.1 Narrow native panel | On GNOME 50, enable SpeedCheck Panel. Inspect native screenshots at 640×800 and 800×800; open SpeedCheck and the clock calendar. Disable/re-enable the helper and restart SpeedCheck. | Clock sits beside Activities on the left; complete download/upload text is readable on the right with no gauge icon or clock overlap; menus work. Disabling restores the prior clock position; re-enabling and app restart restore the text-only layout. Interval stays 15 minutes. Save screenshots, actor rectangles, extension state and final preferences. |
 | TC07.2 Resize without clipping | Keep the helper enabled while the native display changes from 640 to 800 pixels wide and back. Inspect the complete panel text and clock/indicator rectangles at each width. | Both numerical speeds and Mbps remain fully visible without an ellipsis; the clock and SpeedCheck never intersect. GNOME uses available panel space instead of squeezing the right side into half the screen. Save screenshots and geometry for all widths. |
+| TC08.1 Standalone GNOME startup | With `gnome-shell-headless.service` active, install and validate the app-owned unit and enabled dependency. Start the unit using its boot definition. | One live app/indicator; retained preferences and results; automatic overdue tests work. Save unit/dependency, service, indicator and real-test status. A session replay is not an actual reboot; record that limit. |
+| TC08.2 Login toggle on remote desktop | Turn Launch on login off, quit and start the unit. Launch manually, turn login on, quit and start the unit again. | Off removes the login file and skips service startup with no app; on starts one app with cached results and both/15/resumed settings. Save condition results, application bus owner and preferences. |
+| TC08.3 Quit, relaunch and cleanup | Quit a service-managed instance, wait beyond its five-second restart delay, then start and relaunch. Repeat install/uninstall in isolated XDG roots with a headless service fixture. | Quit does not respawn; relaunch keeps one PID; install/uninstall manages only the app's unit/link, retains unrelated files, and preserves the login toggle. Leave the real app running. Save process and isolated installation evidence. |

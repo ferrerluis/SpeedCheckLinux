@@ -4,6 +4,15 @@ data_root=${XDG_DATA_HOME:-"$HOME/.local/share"}
 config_root=${XDG_CONFIG_HOME:-"$HOME/.config"}
 state_root=${XDG_STATE_HOME:-"$HOME/.local/state"}
 binary="$HOME/.local/bin/speedcheck-linux"
+headless_service="$config_root/systemd/user/speedcheck-linux-headless.service"
+if [[ -f "$headless_service" && -n ${DBUS_SESSION_BUS_ADDRESS:-} ]]; then
+    systemctl --user stop speedcheck-linux-headless.service
+fi
+rm -f "$headless_service" \
+    "$config_root/systemd/user/gnome-shell-headless.service.wants/speedcheck-linux-headless.service"
+if [[ -n ${DBUS_SESSION_BUS_ADDRESS:-} ]]; then
+    systemctl --user daemon-reload
+fi
 extension_uuid="speedcheck-panel@speedcheck-linux"
 if [[ -n ${DBUS_SESSION_BUS_ADDRESS:-} ]]; then
     gnome-extensions disable "$extension_uuid" >/dev/null 2>&1 || true
