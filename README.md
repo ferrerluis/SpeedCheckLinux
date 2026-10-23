@@ -121,7 +121,7 @@ Uploads retain three adaptive samples starting at 256 kB, targeting 1.5 seconds
 and capped at 32 MB per request; their final reading uses total measured bytes
 over total sample seconds. Both directions use decimal Mbps.
 
-Result fields ending in `_bytes` count all payload bytes, including warm-up and
+The `download_bytes` and `upload_bytes` fields count all payload bytes, including warm-up and
 ramp-up, for data-use accounting. `_measured_bytes` and `_seconds` identify the
 bytes/time used in the final speed calculation; download ramp-up probes are
 excluded from those fields. Earlier cached results remain readable.
@@ -200,6 +200,7 @@ start cadence, overlap prevention, pause/resume, offline/suspend catch-up, and
 failure persistence. Product acceptance steps are in [docs/acceptance.md](docs/acceptance.md).
 Narrow-screen layout results are in [the panel verification report](docs/panel-layout-verification.md).
 Remote-desktop boot startup results are in [the startup verification report](docs/startup-verification.md).
+Sustained-sampling results are in [the measurement verification report](docs/sustained-verification.md).
 
 For live schedule verification, `speedcheck-linux --verification-interval 10`
 temporarily selects ten seconds without saving that interval. Restore with
