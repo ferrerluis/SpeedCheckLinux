@@ -72,10 +72,12 @@ Useful commands forward to the existing instance through the session bus:
 ~/.local/bin/speedcheck-linux --pause
 ~/.local/bin/speedcheck-linux --resume
 ~/.local/bin/speedcheck-linux --interval 15
-~/.local/bin/speedcheck-linux --display both
+~/.local/bin/speedcheck-linux --display-mode both
 ~/.local/bin/speedcheck-linux --launch-on-login on
 ~/.local/bin/speedcheck-linux --quit
 ```
+
+The older `--display` spelling remains an alias for `--display-mode`.
 
 Launching again reuses the same Gio application instance. Quit cancels a running
 measurement and exits; it leaves login startup enabled unless you turn it off.

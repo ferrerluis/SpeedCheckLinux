@@ -291,7 +291,7 @@ class SpeedCheck(Gtk.Application):
                 self.request_quit()
             elif len(args) == 2 and args[0] == "--interval" and int(args[1]) in INTERVALS:
                 self.set_interval(int(args[1]))
-            elif len(args) == 2 and args[0] == "--display" and args[1] in MODES:
+            elif len(args) == 2 and args[0] == "--display-mode" and args[1] in MODES:
                 self.set_display(args[1])
             elif len(args) == 2 and args[0] == "--launch-on-login" and args[1] in ("on", "off"):
                 self.set_autostart(args[1] == "on")
@@ -325,4 +325,7 @@ def main():
     log_path = paths.state_dir / "app.log"
     if log_path.stat().st_size > 1_000_000:
         log_path.write_text("")
-    return SpeedCheck().run(sys.argv)
+    # GTK consumes --display as its own display-server option before dispatch.
+    # Normalize our legacy spelling locally; --display-mode is unambiguous.
+    args = ["--display-mode" if arg == "--display" else arg for arg in sys.argv]
+    return SpeedCheck().run(args)
